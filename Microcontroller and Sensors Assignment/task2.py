@@ -29,7 +29,7 @@ ax.legend()
 
 # Update function for animation
 def update(frame):
-    if ser.in_waiting > 0:  # Check if data is available
+    while ser.in_waiting > 0:  # Check if data is available
         try:
             line_str = ser.readline().decode("utf-8").strip()  # Read a line from serial
             parts = line_str.split('\t')
