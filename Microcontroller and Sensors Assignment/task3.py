@@ -5,7 +5,7 @@ from collections import deque
 
 # Serial port configuration
 SERIAL_PORT = "COM3"
-BAUD_RATE = 9600
+BAUD_RATE = 115200
 
 # Data storage
 MAX_POINTS = 100
@@ -29,10 +29,11 @@ ax.legend()
 
 # Update function for animation
 def update(frame):
-    if ser.in_waiting > 0:  # Check if data is available
+    while ser.in_waiting > 0:  # Check if data is available
         try:
             line_str = ser.readline().decode("utf-8").strip()  # Read a line from serial
             parts = line_str.split('\t')
+            print(parts)
             if len(parts) == 4:  # Ensure the line contains x, y, z, and angle
                 angle = float(parts[3])  # Extract the angle
                 angle_data.append(angle)  # Add the angle to the deque
