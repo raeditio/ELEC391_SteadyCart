@@ -6,14 +6,15 @@ float gyroAngle = 0;
 float compAngle = 0;
 float gyroRate = 0;
 float k = 0.98; // Adjust this based on tuning
+unsigned long previous_time
 
 void setup() {
-  Serial.begin(9600);
+  Serial.begin(115200);
   if (!IMU.begin()) {
     Serial.println("Failed to initialize IMU!");
     while (1);
   }
-  previousTime = millis();
+  previous_time = millis();
 }
 
 void loop() {
@@ -23,7 +24,7 @@ void loop() {
     IMU.readGyroscope(gx, gy, gz);
 
     // Compute accelerometer angle
-    accelAngle = atan2(sqrt(ax ** 2 + ay ** 2), z) * 180.0 / PI;
+    accelAngle = atan2(sqrt(ax * ax + ay * ay), az) * 180.0 / PI;
 
     // Time difference in seconds
     unsigned long previous_time= 0;
@@ -39,10 +40,10 @@ void loop() {
     compAngle = k * (compAngle + gyroAngle) + (1 - k) * accelAngle;
 
     // Send data over serial
+    Serial.println(compAngle);
+    Serial.print(",");
     Serial.print(accelAngle);
     Serial.print(",");
     Serial.print(gyroAngle);
-    Serial.print(",");
-    Serial.println(compAngle);
   }
 }
