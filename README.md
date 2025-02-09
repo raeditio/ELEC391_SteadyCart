@@ -1,4 +1,4 @@
-# ELEC391 UpCart
+# ELEC391 SteadyCart
 ELEC 391 Project Repository
 
 This project intends to design a self-balancing dual wheel cart. An Arduino Nano 33 BLE is used to measure and control the movement of the cart.
