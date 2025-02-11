@@ -38,24 +38,51 @@ void onCommandReceived(String command) {
       switch (task) {
       case 0:
         pwm = 0;
-        for (int motor : forward) {
+        for (int motor : motors) {
         analogWrite(motor, pwm);
         }
         Serial.println("Task0: Idle");
         break;
       case 1:
+        pwm = 0;
+        for (int motor : motors) {
+        analogWrite(motor, pwm);
+        }
         Serial.println("Task1: Forward Drive");
         break;
       case 2:
+        pwm = 0;
+        for (int motor : motors) {
+        analogWrite(motor, pwm);
+        }
         Serial.println("Task2: Reverse Drive");
         break;
       case 3:
+        pwm = 0;
+        for (int motor : motors) {
+        analogWrite(motor, pwm);
+        }
         Serial.println("Task3: Opposite Directions");
         break;
       case 4:
+        pwm = 0;
+        for (int motor : motors) {
+        analogWrite(motor, pwm);
+        }
+        Serial.println("Task4: Opposite Direction Reverse");
+        break;
+      case 5:
+        pwm = 0;
+        for (int motor : motors) {
+        analogWrite(motor, pwm);
+        }
         Serial.println("Task4: Angle Counter Drive");
         break;
       default:
+        pwm = 0;
+        for (int motor : motors) {
+        analogWrite(motor, pwm);
+        }
         Serial.println("Invalid task number. Only 0-4 are allowed");
       }
 
@@ -105,6 +132,9 @@ void onCommandReceived(String command) {
           analogWrite(reverse[1], pwm);
           break;
         case 4:
+          analogWrite(reverse[0], pwm);
+          analogWrite(forward[1], pwm);
+        case 5:
           Serial.println("RPM command not allowed for Task4");
           break;
       }
@@ -121,7 +151,7 @@ void setup() {
   // Initialize IMU
   initIMU();
   Serial.println("IMU initialized");
-  Serial.println("Waiting for commands (TASK:0-4, RPM:xx)...");
+  Serial.println("Waiting for commands (TASK:0-5, RPM:xx)...");
 }
 
 void loop() {
@@ -146,7 +176,7 @@ void loop() {
   }
   
 
-  if (task == 4) {
+  if (task == 5) {
     float accelAngle = getAccelAngle();  // Get accelerometer angle
 
     // Scale -90° to 90° into 0 to 255 PWM
