@@ -9,9 +9,9 @@ float accelAngle = 0;          // Angle calculated using only the accelerometer
 float initialAngleOffset = 0;  // Offset to subtract from readings
 
 // PID Variables
-float Kp = 2.5;   // Proportional Gain (Adjust for faster/slower response)
-float Ki = 0.01;  // Integral Gain (Can be set to 0 if not needed)
-float Kd = 0.8;   // Derivative Gain (Smooths sudden changes)
+float Kp = 18;   // Proportional Gain (Adjust for faster/slower response) (kcrit = 30)
+float Ki = 180;  // Integral Gain (Can be set to 0 if not needed)
+float Kd = 0.45;   // Derivative Gain (Smooths sudden changes)
 float prevError = 0;
 float integral = 0;
 unsigned long prevTime = 0;
@@ -19,7 +19,7 @@ unsigned long prevTime = 0;
 void initIMU() {
     Serial.begin(115200);
     Serial.println("Initializing IMU...");
-    while (!Serial);
+    // while (!Serial);
 
     if (!IMU.begin()) {
         Serial.println("Failed to initialize IMU!");
@@ -34,9 +34,9 @@ void initIMU() {
     IMU.readAcceleration(ax, ay, az);
 
     // Compute initial tilt angle
-    initialAngleOffset = -atan2(ay, sqrt(ax * ax + az * az)) * 180.0 / PI; // Corrected formula for pitch
-    Serial.print("Initial Angle Offset: ");
-    Serial.println(initialAngleOffset);
+    // initialAngleOffset = -atan2(ay, sqrt(ax * ax + az * az)) * 180.0 / PI; // Corrected formula for pitch
+    // Serial.print("Initial Angle Offset: ");
+    // Serial.println(initialAngleOffset);
 
     prevTime = millis();  // Initialize time for PID
 }
@@ -50,7 +50,7 @@ float getAccelAngle() {
         accelAngle = -atan2(ay, sqrt(ax * ax + az * az)) * 180.0 / PI;
 
         // Subtract the initial offset to normalize readings
-        accelAngle -= initialAngleOffset;
+        // accelAngle -= initialAngleOffset;
 
         // Debug output
         Serial.print("Accelerometer Angle (Offset Applied): ");

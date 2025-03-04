@@ -100,5 +100,5 @@ void loop() {
         }
     // }
 
-    delay(100);  // Short delay for stability
+    //delay(100);  // Short delay for stability
 }
