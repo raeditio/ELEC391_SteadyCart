@@ -9,9 +9,9 @@ float accelAngle = 0;          // Angle calculated using only the accelerometer
 float initialAngleOffset = 0;  // Offset to subtract from readings
 
 // PID Variables
-float Kp = 18;   // Proportional Gain (Adjust for faster/slower response) (kcrit = 30)
-float Ki = 180;  // Integral Gain (Can be set to 0 if not needed)
-float Kd = 0.45;   // Derivative Gain (Smooths sudden changes)
+float Kp = 642.4256;   // Proportional Gain (Adjust for faster/slower response) (kcrit = 30)
+float Ki = 926.2478;  // Integral Gain (Can be set to 0 if not needed)
+float Kd = 141.3932;   // Derivative Gain (Smooths sudden changes)
 float prevError = 0;
 float integral = 0;
 unsigned long prevTime = 0;
@@ -75,6 +75,10 @@ int computePID(float targetAngle, float currentAngle) {
     float output = (Kp * error) + (Ki * integral) + (Kd * derivative);
 
     // Map output to valid PWM range (0-255)
-    int pwmValue = constrain(abs(output), 0, 255);
+    // int pwmValue = constrain(abs(output), 0, 255);
+
+    int sign = (output < 0) ? -1 : 1;  // Get the sign
+    float scaledOutput = pow(abs(output) / 255.0, 1.5) * 255.0;  // Apply quadratic scaling
+    int pwmValue constrain(sign * (int)scaledOutput, -255, 255);  // Restore sign and constrain
     return pwmValue;
 }
