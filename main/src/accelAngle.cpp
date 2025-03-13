@@ -9,9 +9,9 @@ float accelAngle = 0;          // Angle calculated using only the accelerometer
 float initialAngleOffset = 0;  // Offset to subtract from readings
 
 // PID Variables
-float Kp = 18;   // Proportional Gain (Adjust for faster/slower response) (kcrit = 30)
-float Ki = 180;  // Integral Gain (Can be set to 0 if not needed)
-float Kd = 0.45;   // Derivative Gain (Smooths sudden changes)
+float Kp = 642.4256;   // Proportional Gain (Adjust for faster/slower response) (kcrit = 30)
+float Ki = 926.2478;  // Integral Gain (Can be set to 0 if not needed)
+float Kd = 141.3932;   // Derivative Gain (Smooths sudden changes)
 float prevError = 0;
 float integral = 0;
 unsigned long prevTime = 0;
@@ -60,6 +60,11 @@ float getAccelAngle() {
     return accelAngle;
 }
 
+// Function to calculate PWM from RPM using the given polynomial equation
+int rpm2pwm(float rpm) {
+    return 6e-05 * pow(rpm, 3) - 0.0358 * pow(rpm, 2) + 7.1803 * rpm - 83.148;
+}
+
 // PID Controller Function
 int computePID(float targetAngle, float currentAngle) {
     unsigned long currentTime = millis();
@@ -71,10 +76,13 @@ int computePID(float targetAngle, float currentAngle) {
     float derivative = (error - prevError) / dt;  // Derivative term (smooths response)
     prevError = error;  // Store error for next iteration
 
-    // Compute PID output
-    float output = (Kp * error) + (Ki * integral) + (Kd * derivative);
+    // Compute PID output (desired RPM)
+    float desiredRPM = (Kp * error) + (Ki * integral) + (Kd * derivative);
 
-    // Map output to valid PWM range (0-255)
-    int pwmValue = constrain(abs(output), 0, 255);
+    // Calculate the corresponding PWM value using the polynomial equation
+    int pwmValue = rpm2pwm(desiredRPM);
+
+    // Constrain PWM value to valid range (0-255)
+    pwmValue = constrain(pwmValue, 0, 255);
     return pwmValue;
 }
