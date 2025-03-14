@@ -12,7 +12,7 @@ const int reverse[] = {leftReverse, rightReverse};
 
 int task = 0;
 int pwm = 0;
-float targetAngle = 0;  // Desired angle (e.g., keep at level 0°)
+// float targetAngle = 0;  // Desired angle (e.g., keep at level 0°)
 
 // void onCommandReceived(String command) {
 //     char buffer[command.length() + 1];
@@ -71,10 +71,10 @@ void loop() {
         float currentAngle = getAccelAngle();  // Get tilt angle
 
         // Compute PID-controlled motor speed
-        int speed = computePID(targetAngle, currentAngle);
+        int speed = computePID(currentAngle);
 
-        Serial.print("Target: ");
-        Serial.print(targetAngle);
+        // Serial.print("Target: ");
+        // Serial.print(targetAngle);
         Serial.print("°, Current: ");
         Serial.print(currentAngle, 2);
         Serial.print("°, Adjusted PWM: ");

@@ -9,9 +9,9 @@ float accelAngle = 0;          // Angle calculated using only the accelerometer
 float initialAngleOffset = 0;  // Offset to subtract from readings
 
 // PID Variables
-float Kp = 1160;   // Proportional Gain (Adjust for faster/slower response) (kcrit = 30)
-float Ki = 3750;  // Integral Gain (Can be set to 0 if not needed)
-float Kd = 89.2;   // Derivative Gain (Smooths sudden changes)
+float Kp = 1.06;   // Proportional Gain (Adjust for faster/slower response) (kcrit = 30)
+float Ki = 1.33;  // Integral Gain (Can be set to 0 if not needed)
+float Kd = 3.87;   // Derivative Gain (Smooths sudden changes)
 float prevError = 0;
 float integral = 0;
 unsigned long prevTime = 0;
@@ -53,8 +53,8 @@ float getAccelAngle() {
         // accelAngle -= initialAngleOffset;
 
         // Debug output
-        Serial.print("Accelerometer Angle (Offset Applied): ");
-        Serial.println(accelAngle);
+        // Serial.print("Accelerometer Angle (Offset Applied): ");
+        // Serial.println(accelAngle);
     }
 
     return accelAngle;
@@ -66,13 +66,18 @@ int rpm2pwm(float rpm) {
 }
 
 // PID Controller Function
-int computePID(float targetAngle, float currentAngle) {
+int computePID(float currentAngle) {
+    currentAngle = abs(currentAngle) * PI / 180;  // Convert to radians (absolute value)
     unsigned long currentTime = millis();
     float dt = (currentTime - prevTime) / 1000.0;  // Time difference in seconds
+    if (dt < 0.001) dt = 0.001;  // Prevent division by zero
     prevTime = currentTime;
 
-    float error = targetAngle - currentAngle;  // Difference between target and current angle
+    float error = currentAngle;  // Difference between target and current angle
     integral += error * dt;   // Integral term (accumulates small errors)
+    float maxIntegral = 0.1;  // Limit to prevent windup
+    integral = constrain(integral, -maxIntegral, maxIntegral);
+
     float derivative = (error - prevError) / dt;  // Derivative term (smooths response)
     prevError = error;  // Store error for next iteration
 
@@ -87,16 +92,20 @@ int computePID(float targetAngle, float currentAngle) {
     // Angular velocity = Angular acceleration * Time
     // Thus, RPM = Angular velocity * 60 / (2 * PI)
     // RPM = (acceleration / radius * t) * 60 / (2 * PI)
-    // Assume t = 1 second for simplicity
     float radius = 0.04;  // Radius of the wheel (m)
 
     // Calculate the desired RPM based on the acceleration
     float desiredRPM = (acceleration / radius) * 60 / (2 * PI);
 
+
+    // print the desired RPM
+    Serial.print("Desired RPM: ");
+    Serial.println(desiredRPM);
+
     // Calculate the corresponding PWM value using the polynomial equation
     int pwmValue = rpm2pwm(desiredRPM);
 
     // Constrain PWM value to valid range (0-255)
-    pwmValue = constrain(pwmValue, 0, 255);
+    // pwmValue = constrain(pwmValue, 0, 255);
     return pwmValue;
 }
