@@ -9,9 +9,9 @@ float accelAngle = 0;          // Angle calculated using only the accelerometer
 float initialAngleOffset = 0;  // Offset to subtract from readings
 
 // PID Variables
-float Kp = 642.4256;   // Proportional Gain (Adjust for faster/slower response) (kcrit = 30)
-float Ki = 926.2478;  // Integral Gain (Can be set to 0 if not needed)
-float Kd = 141.3932;   // Derivative Gain (Smooths sudden changes)
+float Kp = 1160;   // Proportional Gain (Adjust for faster/slower response) (kcrit = 30)
+float Ki = 3750;  // Integral Gain (Can be set to 0 if not needed)
+float Kd = 89.2;   // Derivative Gain (Smooths sudden changes)
 float prevError = 0;
 float integral = 0;
 unsigned long prevTime = 0;
@@ -76,8 +76,22 @@ int computePID(float targetAngle, float currentAngle) {
     float derivative = (error - prevError) / dt;  // Derivative term (smooths response)
     prevError = error;  // Store error for next iteration
 
-    // Compute PID output (desired RPM)
-    float desiredRPM = (Kp * error) + (Ki * integral) + (Kd * derivative);
+    // Compute PID output (Correction Force)
+    float Force = (Kp * error) + (Ki * integral) + (Kd * derivative);
+
+    // Compute required acceleration
+    int M = 4;  // Mass of the Cart (kg)
+    float acceleration = Force / M;
+
+    // Angular acceleration = Linear acceleration / Radius of the wheel
+    // Angular velocity = Angular acceleration * Time
+    // Thus, RPM = Angular velocity * 60 / (2 * PI)
+    // RPM = (acceleration / radius * t) * 60 / (2 * PI)
+    // Assume t = 1 second for simplicity
+    float radius = 0.04;  // Radius of the wheel (m)
+
+    // Calculate the desired RPM based on the acceleration
+    float desiredRPM = (acceleration / radius) * 60 / (2 * PI);
 
     // Calculate the corresponding PWM value using the polynomial equation
     int pwmValue = rpm2pwm(desiredRPM);
