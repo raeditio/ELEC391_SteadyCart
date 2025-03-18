@@ -1,5 +1,5 @@
 #include <Arduino.h>
-#include "accelAngle.h"
+#include "compAngle.h"
 
 #define leftForward D2
 #define leftReverse D3
@@ -68,25 +68,26 @@ void loop() {
     // }
 
     // if (task == 4) {
-        float currentAngle = getAccelAngle();  // Get tilt angle
+        float currentAngle = getCompAngle();  // Get tilt angle
 
         // Compute PID-controlled motor speed
         int speed = computePID(currentAngle);
 
         // Serial.print("Target: ");
         // Serial.print(targetAngle);
-        Serial.print("°, Current: ");
-        Serial.print(currentAngle, 2);
-        Serial.print("°, Adjusted PWM: ");
+        // Serial.print("°, Current: ");
+        // Serial.print(currentAngle, 2);
+        Serial.print(", Adjusted PWM: ");
+        if (currentAngle > 0) Serial.print("-");
         Serial.println(speed);
 
         // If angle is positive, move forward; if negative, move in reverse
-        if (currentAngle > 0) {
+        if (currentAngle < 0) {
             analogWrite(leftForward, speed);
             analogWrite(rightForward, speed);
             analogWrite(leftReverse, 0);
             analogWrite(rightReverse, 0);
-        } else if (currentAngle < 0) {
+        } else if (currentAngle > 0) {
             analogWrite(leftReverse, speed);
             analogWrite(rightReverse, speed);
             analogWrite(leftForward, 0);

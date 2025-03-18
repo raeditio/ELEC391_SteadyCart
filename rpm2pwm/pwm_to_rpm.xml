@@ -1,39 +1,39 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <data>
     <point>
-        <pwm>55</pwm>
         <rpm>210</rpm>
+        <pwm>55</pwm>
     </point>
     <point>
-        <pwm>80</pwm>
         <rpm>300</rpm>
+        <pwm>80</pwm>
     </point>
     <point>
-        <pwm>105</pwm>
         <rpm>349.2</rpm>
+        <pwm>105</pwm>
     </point>
     <point>
-        <pwm>130</pwm>
         <rpm>375.96</rpm>
+        <pwm>130</pwm>
     </point>
     <point>
-        <pwm>155</pwm>
         <rpm>394.8</rpm>
+        <pwm>155</pwm>
     </point>
     <point>
-        <pwm>180</pwm>
         <rpm>406.8</rpm>
+        <pwm>180</pwm>
     </point>
     <point>
-        <pwm>205</pwm>
         <rpm>416.4</rpm>
+        <pwm>205</pwm>
     </point>
     <point>
-        <pwm>230</pwm>
         <rpm>423</rpm>
+        <pwm>230</pwm>
     </point>
     <point>
-        <pwm>255</pwm>
         <rpm>435</rpm>
+        <pwm>255</pwm>
     </point>
 </data>

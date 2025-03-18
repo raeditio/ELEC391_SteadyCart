@@ -12,7 +12,7 @@ den_s = M * l * s^2 - (M + m) * g;  % M*l*s^2 - (M+m)*g
 
 %% Convert to Transfer Function (Numerator is 1)
 num = 1;
-den = [M*l, 0, -(M+m)*g];
+den = [M*l, 0, -(M+m)*g];  % Now using symbolic parameters
 
 G_theta = tf(num, den);  % Create Transfer Function
 disp('Transfer Function G_theta(s):');
