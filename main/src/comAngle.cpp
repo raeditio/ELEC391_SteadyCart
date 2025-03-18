@@ -9,15 +9,15 @@ float accelAngle = 0;          // Angle calculated using only the accelerometer
 float gyroAngle;           // Angle calculated using only the gyroscope
 float compAngle;           // Combined angle using complementary filter
 
-float Kc = 0.95;  // Weight for accelerometer data (adjust as needed)
+float Kc = 0.91;  // Weight for accelerometer data (adjust as needed)
 
 // PID Variables
 // float Kp = 1.06;   // Proportional Gain (Adjust for faster/slower response)
 // float Ki = 1.33;  // Integral Gain (Can be set to 0 if not needed)
 // float Kd = 0.87;   // Derivative Gain (Smooths sudden changes)
-float Kp = 1160;
-float Ki = 4330;
-float Kd = 0;
+float Kp = 1330;
+float Ki = 1000;
+float Kd = 2650;
 float prevError = 0;
 float integral = 0;
 unsigned long prevTime = 0;
@@ -59,7 +59,7 @@ float getAccelAngle() {
 }
 
 float getGyroAngle() {
-    float prevAngle = gyroAngle;
+    // float prevAngle = gyroAngle;
     if (IMU.gyroscopeAvailable()) {
         // Compute tilt angle using the gyroscope
         float gx, gy, gz;
@@ -68,12 +68,12 @@ float getGyroAngle() {
         prevTime = millis();
         gyroAngle -= gx * dt;
     }
-    return (prevAngle - gyroAngle);
+    return (gyroAngle);
 }
 
 float getCompAngle() {
     // Combine accelerometer and gyroscope readings using complementary filter
-    compAngle = Kc * (compAngle + getGyroAngle()) + (1 - Kc) * getAccelAngle();
+    compAngle = Kc * (compAngle + getGyroAngle() * ((millis() - prevTime) / 1000.0)) + (1 - Kc) * getAccelAngle();
     
     Serial.print("Comp Angle: ");
     Serial.print(compAngle);
@@ -88,7 +88,8 @@ float getCompAngle() {
 
 // Function to calculate PWM from RPM using the given polynomial equation
 int rpm2pwm(float rpm) {
-    return 0.000041559 * pow(rpm, 3) - 0.0347502552 * pow(rpm, 2) + 9.8233911975 * rpm - 860.4124730999;
+    // return 0.000041559 * pow(rpm, 3) - 0.0347502552 * pow(rpm, 2) + 9.8233911975 * rpm - 860.4124730999;
+    return 0.000675698364746 * pow(rpm, 2.07915394237297); // Exponential equation
 }
 
 // PID Controller Function
@@ -99,7 +100,7 @@ int computePID(float currentAngle) {
     if (dt < 0.001) dt = 0.001;  // Prevent division by zero
     prevTime = currentTime;
 
-    float error = currentAngle;  // Difference between target and current angle
+    float error = -currentAngle;  // Difference between target and current angle
     integral += error * dt;   // Integral term (accumulates small errors)
 
     float derivative = (error - prevError) / dt;  // Derivative term (smooths response)
@@ -114,7 +115,9 @@ int computePID(float currentAngle) {
     Serial.print(" | I: ");
     Serial.print(Ki * integral);
     Serial.print(" | D: ");
-    Serial.println(Kd * derivative);
+    Serial.print(Kd * derivative);
+    Serial.print(" | Force: ");
+    Serial.println(Force);
 
     // Compute required acceleration
     int M = 4;  // Mass of the Cart (kg)
@@ -127,14 +130,14 @@ int computePID(float currentAngle) {
     float radius = 0.04;  // Radius of the wheel (m)
 
     // Calculate the desired RPM based on the acceleration
-    float desiredRPM = abs((acceleration / radius * dt) * 60 / (2 * PI));
+    float desiredRPM = (acceleration / radius * dt) * 60 / (2 * PI);
 
     // print the desired RPM
     Serial.print("Desired RPM: ");
     Serial.print(desiredRPM);
 
     // Calculate the corresponding PWM value using the polynomial equation
-    int pwmValue = rpm2pwm(desiredRPM);
+    int pwmValue = rpm2pwm(abs(desiredRPM));
 
     // Constrain PWM value to valid range (0-255)
     // pwmValue = constrain(pwmValue, 0, 255);

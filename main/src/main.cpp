@@ -71,7 +71,8 @@ void loop() {
         float currentAngle = getCompAngle();  // Get tilt angle
 
         // Compute PID-controlled motor speed
-        int speed = computePID(currentAngle);
+        // int speed = computePID(currentAngle);
+        int speed = 0;
 
         // Serial.print("Target: ");
         // Serial.print(targetAngle);
@@ -82,22 +83,22 @@ void loop() {
         Serial.println(speed);
 
         // If angle is positive, move forward; if negative, move in reverse
-        if (currentAngle < 0) {
+        if (currentAngle > 0) {
             analogWrite(leftForward, speed);
             analogWrite(rightForward, speed);
             analogWrite(leftReverse, 0);
             analogWrite(rightReverse, 0);
-        } else if (currentAngle > 0) {
+        } else if (currentAngle < 0) {
             analogWrite(leftReverse, speed);
             analogWrite(rightReverse, speed);
             analogWrite(leftForward, 0);
             analogWrite(rightForward, 0);
-        } else {
-            // Stop motors if the angle is near 0
-            analogWrite(leftForward, 0);
-            analogWrite(rightForward, 0);
-            analogWrite(leftReverse, 0);
-            analogWrite(rightReverse, 0);
+        // } else {
+        //     // Stop motors if the angle is near 0
+        //     analogWrite(leftForward, 0);
+        //     analogWrite(rightForward, 0);
+        //     analogWrite(leftReverse, 0);
+        //     analogWrite(rightReverse, 0);
         }
     // }
 
