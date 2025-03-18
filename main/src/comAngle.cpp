@@ -9,12 +9,14 @@ float accelAngle = 0;          // Angle calculated using only the accelerometer
 float gyroAngle;           // Angle calculated using only the gyroscope
 float compAngle;           // Combined angle using complementary filter
 
+float Kc = 0.95;  // Weight for accelerometer data (adjust as needed)
+
 // PID Variables
 // float Kp = 1.06;   // Proportional Gain (Adjust for faster/slower response)
 // float Ki = 1.33;  // Integral Gain (Can be set to 0 if not needed)
 // float Kd = 0.87;   // Derivative Gain (Smooths sudden changes)
-float Kp = 160;
-float Ki = 0;
+float Kp = 1160;
+float Ki = 4330;
 float Kd = 0;
 float prevError = 0;
 float integral = 0;
@@ -71,7 +73,6 @@ float getGyroAngle() {
 
 float getCompAngle() {
     // Combine accelerometer and gyroscope readings using complementary filter
-    float Kc = 0.95;  // Weight for accelerometer data (adjust as needed)
     compAngle = Kc * (compAngle + getGyroAngle()) + (1 - Kc) * getAccelAngle();
     
     Serial.print("Comp Angle: ");
@@ -100,8 +101,6 @@ int computePID(float currentAngle) {
 
     float error = currentAngle;  // Difference between target and current angle
     integral += error * dt;   // Integral term (accumulates small errors)
-    float maxIntegral = 0.1;  // Limit to prevent windup
-    integral = constrain(integral, -maxIntegral, maxIntegral);
 
     float derivative = (error - prevError) / dt;  // Derivative term (smooths response)
     prevError = error;  // Store error for next iteration
