@@ -11,13 +11,10 @@ float compAngle;           // Combined angle using complementary filter
 
 float Kc = 0.91;  // Weight for accelerometer data (adjust as needed)
 
-// PID Variables
-// float Kp = 1.06;   // Proportional Gain (Adjust for faster/slower response)
-// float Ki = 1.33;  // Integral Gain (Can be set to 0 if not needed)
-// float Kd = 0.87;   // Derivative Gain (Smooths sudden changes)
-float Kp = 1330;
-float Ki = 1000;
-float Kd = 2650;
+// PID Variables 
+float Kp = 730;     // Proportional Gain (Adjust for faster/slower response)
+float Ki = 7000;    // Integral Gain (Corrects steady-state error)
+float Kd = 128;     // Derivative Gain (Smooths sudden changes)
 float prevError = 0;
 float integral = 0;
 unsigned long prevTime = 0;
