@@ -23,3 +23,6 @@ Collection of source codes for the Arduino Nano 33 BLE in development that may b
 
 ## Proof of Concept
 The Proof of Concept program was written to demonstrate the MCU's ability to adjust its PWM inputs into the motor controller based on given commands and its detected angular position.
+
+## Main
+The Main program is set to balance the cart using the complementary angle-based DC motor control. The complementary angle is calculated as a combination of the angles calculated each using the accelerometer and the gyroscope. The gyro angle is initialized based on the accelerometer data. Through PID, the required force to balance the cart is computed. This force is converted into the required RPM of the wheels and its directions, then into the required PWM output of the Arduino Nano 33 BLE Sense Rev2 as an input to the DRV8833 motor controllers, using a polynomial mapping function. The angle of the cart, PID, required force, RPM and PWM are outputted through the serial monitor.
