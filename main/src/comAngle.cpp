@@ -12,9 +12,9 @@ float compAngle;           // Combined angle using complementary filter
 float Kc = 0.91;  // Weight for accelerometer data (adjust as needed)
 
 // PID Variables 
-float Kp = 175;     // Proportional Gain (Adjust for faster/slower response)
-float Ki = 0;    // Integral Gain (Corrects steady-state error)
-float Kd = 0;     // Derivative Gain (Smooths sudden changes)
+float Kp = 600;     // Proportional Gain (Adjust for faster/slower response)
+float Ki = 1300;    // Integral Gain (Corrects steady-state error)
+float Kd = 60;     // Derivative Gain (Smooths sudden changes)
 float prevError = 0;
 float integral = 0;
 unsigned long prevTime = 0;
@@ -96,7 +96,7 @@ int rpm2pwm(float rpm) {
 }
 
 // PID Controller Function
-float computePID(float currentAngle) {
+int computePID(float currentAngle) {
     currentAngle = currentAngle * PI / 180;  // Convert to radians (absolute value)
     unsigned long currentTime = millis();
     float dt = (currentTime - prevTime) / 1000.0;  // Time difference in seconds
