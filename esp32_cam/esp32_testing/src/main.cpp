@@ -158,17 +158,3 @@ void loop() {
 }
 
 
-
-// void setup() {
-//   Serial.begin(115200);
-//   Serial.println("=== BUILD TEST ===");
-//   delay(10);
-//   Serial.println("Hello from ESP32-CAM");
-// }
-
-// void loop() {
-//   delay(100);
-//   Serial.println("Looping...");
-// }
-
-
