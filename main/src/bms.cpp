@@ -3,8 +3,8 @@
 #include "Adafruit_INA3221.h"
 #include <LiquidCrystal.h>
 
-#DEFINE LED 10
-#DEFINE BUZZER 13
+#define LED 10
+#define BUZZER 13
 
 // Creating an INA3221 object
 Adafruit_INA3221 ina3221;

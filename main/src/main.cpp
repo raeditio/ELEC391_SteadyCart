@@ -23,12 +23,20 @@ int task = 0;
 int pwm = 0;
 // float targetAngle = 0;  // Desired angle (e.g., keep at level 0°)
 
-void setup() {
-    Serial.begin(115200);
-    while(!Serial);
+void initBalanceSequence() {
+    // Initialize motors
+    for (int motor : motors) {
+        pinMode(motor, OUTPUT);
+        digitalWrite(motor, LOW);  // Ensure all motors are off initially
+    }
+    Serial.println("Motors initialized");
 
-    pinMode(LED_BUILTIN, OUTPUT);
+    // initialize IMU
+    initIMU();
+    Serial.println("IMU initialized");
+}
 
+void initBLE() {
     if (!BLE.begin()) {
         Serial.println("Starting BLE failed!");
         while (1);
@@ -51,81 +59,97 @@ void setup() {
     BLE.advertise();
 
     Serial.println("Bluetooth® device active, waiting for connections...");
+}
 
-    for (int motor : motors) {
-        pinMode(motor, OUTPUT);
+void balance() {
+    float currentAngle = getCompAngle();  // Get tilt angle
+
+    // Compute PID-controlled motor speed
+    int speed = computePID(currentAngle);
+
+    Serial.print(", Adjusted PWM: ");
+    if (currentAngle > 0) Serial.print("-");
+    Serial.println(speed);
+
+    // If angle is positive, move forward; if negative, move in reverse
+    if (currentAngle < 0) {
+        analogWrite(leftForward, speed);
+        analogWrite(rightForward, speed);
+        analogWrite(leftReverse, 0);
+        analogWrite(rightReverse, 0);
+    } else if (currentAngle > 0) {
+        analogWrite(leftReverse, speed);
+        analogWrite(rightReverse, speed);
+        analogWrite(leftForward, 0);
+        analogWrite(rightForward, 0);
+    } else {
+        // If angle is 0, stop the motors
+        analogWrite(leftForward, 0);
+        analogWrite(rightForward, 0);
+        analogWrite(leftReverse, 0);
+        analogWrite(rightReverse, 0);
     }
-    Serial.println("Motor control initialized");
+}
 
-    // Initialize IMU
-    initIMU();
-    Serial.println("IMU initialized");
+void startBMS() {
+    pinMode(LED_BUILTIN, OUTPUT);
+
     initBMS();  // Initialize BMS
     Serial.println("BMS initialized");
 }
 
+void setup() {
+    Serial.begin(115200);
+    while(!Serial);
+
+    // initBLE();  // Initialize BLE
+    initBalanceSequence();  // Initialize motors and IMU
+    startBMS();  // Initialize BMS
+}
+
 void loop() {
-    // float currentAngle = getCompAngle();  // Get tilt angle
-    // Wait for a BLE central to connect
-    BLEDevice central = BLE.central();
-    if (central) {
-        Serial.print("Connected to central: ");
-        Serial.println(central.address());
-        digitalWrite(LED_BUILTIN, HIGH); // Turn on LED to indicate connection
+    // // Wait for a BLE central to connect
+    // BLEDevice central = BLE.central();
+    // if (central) {
+    //     Serial.print("Connected to central: ");
+    //     Serial.println(central.address());
+    //     digitalWrite(LED_BUILTIN, HIGH); // Turn on LED to indicate connection
 
-        // Keep running while connected
-        while (central.connected()) {
-            float currentAngle = getCompAngle();  // Get tilt angle
+    //     // Keep running while connected
+    //     while (central.connected()) {
+    //         balance();
+    //         displayBatteryInfo();  // Display battery info on LCD
 
-            // Compute PID-controlled motor speed
-            int speed = computePID(currentAngle);
+    //         // Check if the characteristic was written
+    //         if (customCharacteristic.written()) {
+    //         // Get the length of the received data
+    //         int length = customCharacteristic.valueLength();
 
-            Serial.print(", Adjusted PWM: ");
-            if (currentAngle > 0) Serial.print("-");
-            Serial.println(speed);
+    //         // Read the received data
+    //         const unsigned char* receivedData = customCharacteristic.value();
 
-            // If angle is positive, move forward; if negative, move in reverse
-            if (currentAngle < 0) {
-                analogWrite(leftForward, speed);
-                analogWrite(rightForward, speed);
-                analogWrite(leftReverse, 0);
-                analogWrite(rightReverse, 0);
-            } else if (currentAngle > 0) {
-                analogWrite(leftReverse, speed);
-                analogWrite(rightReverse, speed);
-                analogWrite(leftForward, 0);
-                analogWrite(rightForward, 0);
-            } else {
-                // If angle is 0, stop the motors
-                analogWrite(leftForward, 0);
-                analogWrite(rightForward, 0);
-                analogWrite(leftReverse, 0);
-                analogWrite(rightReverse, 0);
-            }
+    //         // Create a properly terminated string
+    //         char receivedString[length + 1]; // +1 for null terminator
+    //         memcpy(receivedString, receivedData, length);
+    //         receivedString[length] = '\0'; // Null-terminate the string
 
-            // Check if the characteristic was written
-            if (customCharacteristic.written()) {
-            // Get the length of the received data
-            int length = customCharacteristic.valueLength();
-
-            // Read the received data
-            const unsigned char* receivedData = customCharacteristic.value();
-
-            // Create a properly terminated string
-            char receivedString[length + 1]; // +1 for null terminator
-            memcpy(receivedString, receivedData, length);
-            receivedString[length] = '\0'; // Null-terminate the string
-
-            // Print the received data to the Serial Monitor
-            Serial.print("Received data: ");
-            Serial.println(receivedString);
+    //         // Print the received data to the Serial Monitor
+    //         Serial.print("Received data: ");
+    //         Serial.println(receivedString);
 
 
-            // Optionally, respond by updating the characteristic's value
-            customCharacteristic.writeValue("Data received");
-            }
-        }
-    digitalWrite(LED_BUILTIN, LOW); // Turn off LED when disconnected
-    Serial.println("Disconnected from central.");
-    }
+    //         // Optionally, respond by updating the characteristic's value
+    //         customCharacteristic.writeValue("Data received");
+    //         }
+    //     }
+    // digitalWrite(LED_BUILTIN, LOW); // Turn off LED when disconnected
+    // Serial.println("Disconnected from central.");
+    // }
+    // else {
+    //     Serial.println("No central connected.");
+    //     balance();
+    //     displayBatteryInfo();  // Display battery info on LCD
+    // }
+
+    balance();
 }
