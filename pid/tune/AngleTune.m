@@ -2,9 +2,9 @@ clc; clear; close all;
 syms s
 
 %% System Parameters
-M = 4;      % Cart Mass (kg)
-m = 0.5;    % Pendulum Mass (kg)
-l = 0.3;    % Pendulum Length (m)
+M = 5;      % Cart Mass (kg)
+m = 1;    % Pendulum Mass (kg)
+l = 0.225;    % Pendulum Length (m)
 g = 9.81;   % Gravity (m/s^2)
 
 %% Define Transfer Function Symbolically
