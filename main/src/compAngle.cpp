@@ -150,5 +150,5 @@ int computePID(float currentAngle) {
     // int pwmValue = rpm2pwm(abs(desiredRPM));
 
     // Constrain PWM value to valid range (0-255)
-    return abs(pwmValue);
+    return pwmValue;
 }

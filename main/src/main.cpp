@@ -68,16 +68,16 @@ void balance() {
     int pwmValue = computePID(currentAngle);
 
     Serial.print(", Adjusted PWM: ");
-    if (currentAngle < 0) Serial.print("-");
+    // if (currentAngle < 0) Serial.print("-");
     Serial.println(pwmValue);
 
     // If angle is positive, move forward; if negative, move in reverse
-    if (currentAngle < 0) {
+    if (pwmValue < 0) {
         analogWrite(leftForward, pwmValue);
         analogWrite(rightForward, pwmValue);
         analogWrite(leftReverse, 0);
         analogWrite(rightReverse, 0);
-    } else if (currentAngle > 0) {
+    } else if (pwmValue > 0) {
         analogWrite(leftReverse, pwmValue);
         analogWrite(rightReverse, pwmValue);
         analogWrite(leftForward, 0);
