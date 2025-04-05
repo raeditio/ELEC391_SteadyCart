@@ -1,0 +1,12 @@
+{
+	"folders": [
+		{
+			"path": "../Arduino/ProofOfConcept"
+		},
+		{
+			"name": "250208-061359-nano33ble",
+			"path": "../../PlatformIO/Projects/250208-061359-nano33ble"
+		}
+	],
+	"settings": {}
+}
