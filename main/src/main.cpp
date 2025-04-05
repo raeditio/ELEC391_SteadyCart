@@ -64,22 +64,22 @@ void initBLE() {
 void balance() {
     float currentAngle = getCompAngle();  // Get tilt angle
 
-    // Compute PID-controlled motor speed
-    int speed = computePID(currentAngle);
+    // Compute PID-controlled motor pwmValue
+    int pwmValue = computePID(currentAngle);
 
     Serial.print(", Adjusted PWM: ");
-    if (currentAngle > 0) Serial.print("-");
-    Serial.println(speed);
+    if (currentAngle < 0) Serial.print("-");
+    Serial.println(pwmValue);
 
     // If angle is positive, move forward; if negative, move in reverse
     if (currentAngle < 0) {
-        analogWrite(leftForward, speed);
-        analogWrite(rightForward, speed);
+        analogWrite(leftForward, pwmValue);
+        analogWrite(rightForward, pwmValue);
         analogWrite(leftReverse, 0);
         analogWrite(rightReverse, 0);
     } else if (currentAngle > 0) {
-        analogWrite(leftReverse, speed);
-        analogWrite(rightReverse, speed);
+        analogWrite(leftReverse, pwmValue);
+        analogWrite(rightReverse, pwmValue);
         analogWrite(leftForward, 0);
         analogWrite(rightForward, 0);
     } else {
@@ -98,58 +98,53 @@ void startBMS() {
     Serial.println("BMS initialized");
 }
 
+void ReceiveBLECommand() {
+    // Wait for a BLE central to connect
+    BLEDevice central = BLE.central();
+    if (central) {
+        Serial.print("Connected to central: ");
+        Serial.println(central.address());
+        digitalWrite(LED_BUILTIN, HIGH); // Turn on LED to indicate connection
+
+        // Keep running while connected
+        while (central.connected()) {
+            // Check if the characteristic was written
+            if (customCharacteristic.written()) {
+            // Get the length of the received data
+            int length = customCharacteristic.valueLength();
+
+            // Read the received data
+            const unsigned char* receivedData = customCharacteristic.value();
+
+            // Create a properly terminated string
+            char receivedString[length + 1]; // +1 for null terminator
+            memcpy(receivedString, receivedData, length);
+            receivedString[length] = '\0'; // Null-terminate the string
+
+            // Print the received data to the Serial Monitor
+            Serial.print("Received data: ");
+            Serial.println(receivedString);
+
+
+            // Optionally, respond by updating the characteristic's value
+            customCharacteristic.writeValue("Data received");
+            }
+        }
+    digitalWrite(LED_BUILTIN, LOW); // Turn off LED when disconnected
+    Serial.println("Disconnected from central.");
+    }
+}
+
 void setup() {
     Serial.begin(115200);
     while(!Serial);
 
     // initBLE();  // Initialize BLE
     initBalanceSequence();  // Initialize motors and IMU
-    startBMS();  // Initialize BMS
+    // startBMS();  // Initialize BMS
 }
 
 void loop() {
-    // // Wait for a BLE central to connect
-    // BLEDevice central = BLE.central();
-    // if (central) {
-    //     Serial.print("Connected to central: ");
-    //     Serial.println(central.address());
-    //     digitalWrite(LED_BUILTIN, HIGH); // Turn on LED to indicate connection
-
-    //     // Keep running while connected
-    //     while (central.connected()) {
-    //         balance();
-    //         displayBatteryInfo();  // Display battery info on LCD
-
-    //         // Check if the characteristic was written
-    //         if (customCharacteristic.written()) {
-    //         // Get the length of the received data
-    //         int length = customCharacteristic.valueLength();
-
-    //         // Read the received data
-    //         const unsigned char* receivedData = customCharacteristic.value();
-
-    //         // Create a properly terminated string
-    //         char receivedString[length + 1]; // +1 for null terminator
-    //         memcpy(receivedString, receivedData, length);
-    //         receivedString[length] = '\0'; // Null-terminate the string
-
-    //         // Print the received data to the Serial Monitor
-    //         Serial.print("Received data: ");
-    //         Serial.println(receivedString);
-
-
-    //         // Optionally, respond by updating the characteristic's value
-    //         customCharacteristic.writeValue("Data received");
-    //         }
-    //     }
-    // digitalWrite(LED_BUILTIN, LOW); // Turn off LED when disconnected
-    // Serial.println("Disconnected from central.");
-    // }
-    // else {
-    //     Serial.println("No central connected.");
-    //     balance();
-    //     displayBatteryInfo();  // Display battery info on LCD
-    // }
-
     balance();
+    //displayBatteryInfo();
 }

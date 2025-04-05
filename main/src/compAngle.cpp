@@ -12,9 +12,17 @@ float compAngle;           // Combined angle using complementary filter
 float Kc = 0.91;  // Weight for accelerometer data (adjust as needed)
 
 // PID Variables 
-float Kp = 600;     // Proportional Gain (Adjust for faster/slower response)
-float Ki = 1300;    // Integral Gain (Corrects steady-state error)
-float Kd = 60;     // Derivative Gain (Smooths sudden changes)
+// float Kp = 1700;     // Proportional Gain (Adjust for faster/slower response)
+// float Ki = 1900;    // Integral Gain (Corrects steady-state error)
+// float Kd = 130;     // Derivative Gain (Smooths sudden changes)
+// float Kp = 2500;
+// float Ki = 2300;
+// float Kd = 140;  // PID gains (adjust as needed)
+
+float Kp = 7000;
+float Ki = 0;
+float Kd = 10;  // PID gains (adjust as needed)
+
 float prevError = 0;
 float integral = 0;
 unsigned long prevTime = 0;
@@ -84,7 +92,7 @@ float getCompAngle() {
     Serial.print(" | ");
     Serial.print("Accel Angle: ");
     Serial.println(accelAngle);
-    return compAngle;
+    return (compAngle - 0.25); //SUbtracting 0.25 to account for slight offset
 }
 
 // Function to calculate PWM from RPM using the given polynomial equation
@@ -109,7 +117,7 @@ int computePID(float currentAngle) {
     prevError = error;  // Store error for next iteration
 
     // Compute PID output (Correction Force)
-    float Force = (Kp * error) + (Ki * integral) + (Kd * derivative);
+    float pwmValue = (Kp * error) + (Ki * integral) - (Kd * derivative);
 
     // Print PID values for debugging
     Serial.print("P: ");
@@ -117,30 +125,30 @@ int computePID(float currentAngle) {
     Serial.print(" | I: ");
     Serial.print(Ki * integral);
     Serial.print(" | D: ");
-    Serial.print(Kd * derivative);
-    Serial.print(" | Force: ");
-    Serial.println(Force);
+    Serial.print(- Kd * derivative);
+    // Serial.print(" | RPM: ");
+    // Serial.println(desiredRPM);
 
     // Compute required acceleration
-    int M = 5;  // Mass of the Cart (kg)
-    float acceleration = Force / M;
+    // int M = 5;  // Mass of the Cart (kg)
+    // float acceleration = Force / M;
 
     // Angular acceleration = Linear acceleration / Radius of the wheel
     // Angular velocity = Angular acceleration * Time
     // Thus, RPM = Angular velocity * 60 / (2 * PI)
     // RPM = (acceleration / radius * t) * 60 / (2 * PI)
-    float radius = 0.04;  // Radius of the wheel (m)
+    // float radius = 0.04;  // Radius of the wheel (m)
 
     // Calculate the desired RPM based on the acceleration
-    float desiredRPM = (acceleration / radius * dt) * 60 / (2 * PI);
+    // float desiredRPM = (acceleration / radius * dt) * 60 / (2 * PI);
 
     // print the desired RPM
-    Serial.print("Desired RPM: ");
-    Serial.print(desiredRPM);
+    // Serial.print("Desired RPM: ");
+    // Serial.print(desiredRPM);
 
     // Calculate the corresponding PWM value using the polynomial equation
-    int pwmValue = rpm2pwm(abs(desiredRPM));
+    // int pwmValue = rpm2pwm(abs(desiredRPM));
 
     // Constrain PWM value to valid range (0-255)
-    return constrain(pwmValue, 0, 255);
+    return abs(pwmValue);
 }
