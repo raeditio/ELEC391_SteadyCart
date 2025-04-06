@@ -1,6 +1,6 @@
 #include <Arduino.h>
 
-int pwm = 55;  // Start at 50
+int pwm = 55;  // Start at 55
 int pwmStep = 25;
 int maxPWM = 255;
 unsigned long lastUpdate = 0;

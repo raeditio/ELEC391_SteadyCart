@@ -64,22 +64,22 @@ void initBLE() {
 void balance() {
     float currentAngle = getCompAngle();  // Get tilt angle
 
-    // Compute PID-controlled motor speed
-    int speed = computePID(currentAngle);
+    // Compute PID-controlled motor pwmValue
+    int pwmValue = computePID(currentAngle);
 
     Serial.print(", Adjusted PWM: ");
-    if (currentAngle > 0) Serial.print("-");
-    Serial.println(speed);
+    // if (currentAngle < 0) Serial.print("-");
+    Serial.println(pwmValue);
 
     // If angle is positive, move forward; if negative, move in reverse
-    if (currentAngle < 0) {
-        analogWrite(leftForward, speed);
-        analogWrite(rightForward, speed);
+    if (pwmValue < 0) {
+        analogWrite(leftForward, pwmValue);
+        analogWrite(rightForward, pwmValue);
         analogWrite(leftReverse, 0);
         analogWrite(rightReverse, 0);
-    } else if (currentAngle > 0) {
-        analogWrite(leftReverse, speed);
-        analogWrite(rightReverse, speed);
+    } else if (pwmValue > 0) {
+        analogWrite(leftReverse, pwmValue);
+        analogWrite(rightReverse, pwmValue);
         analogWrite(leftForward, 0);
         analogWrite(rightForward, 0);
     } else {
@@ -98,7 +98,11 @@ void setupBMS() {
     Serial.println("BMS initialized");
 }
 
+<<<<<<< HEAD
+void ReceiveBLECommand() {
+=======
 void receiveBLECommand() {
+>>>>>>> 8f96ede976c8f2cdab595a15b94d37cfb59242c0
     // Wait for a BLE central to connect
     BLEDevice central = BLE.central();
     if (central) {
@@ -108,9 +112,12 @@ void receiveBLECommand() {
 
         // Keep running while connected
         while (central.connected()) {
+<<<<<<< HEAD
+=======
             balance();
             displayBatteryInfo();  // Display battery info on LCD
 
+>>>>>>> 8f96ede976c8f2cdab595a15b94d37cfb59242c0
             // Check if the characteristic was written
             if (customCharacteristic.written()) {
             // Get the length of the received data
@@ -136,17 +143,30 @@ void receiveBLECommand() {
     digitalWrite(LED_BUILTIN, LOW); // Turn off LED when disconnected
     Serial.println("Disconnected from central.");
     }
+<<<<<<< HEAD
+=======
     else {
         Serial.println("No central connected.");
         balance();
         displayBatteryInfo();  // Display battery info on LCD
     }
+>>>>>>> 8f96ede976c8f2cdab595a15b94d37cfb59242c0
 }
 
 void setup() {
     Serial.begin(115200);
     while(!Serial);
 
+<<<<<<< HEAD
+    // initBLE();  // Initialize BLE
+    initBalanceSequence();  // Initialize motors and IMU
+    // startBMS();  // Initialize BMS
+}
+
+void loop() {
+    balance();
+    //displayBatteryInfo();
+=======
     initBLE();  // Initialize BLE
     initModule();  // Initialize motors and IMU
     setupBMS();  // Initialize BMS
@@ -154,4 +174,5 @@ void setup() {
 
 void loop() {
     receiveBLECommand();  // Wait for BLE commands
+>>>>>>> 8f96ede976c8f2cdab595a15b94d37cfb59242c0
 }
