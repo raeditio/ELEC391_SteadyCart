@@ -2,8 +2,13 @@ clc; clear; close all;
 
 % Define system parameters
 M = 4.0;    % Cart mass (kg)
+<<<<<<< HEAD
 m = 1.5;    % Pendulum mass (kg)
 l = 0.5;    % Pendulum length (m)
+=======
+m = 0.5;    % Pendulum mass (kg)
+l = 0.3;    % Pendulum length (m)
+>>>>>>> main
 g = 9.81;   % Gravity (m/s²)
 
 % Defien transfer function G(s) = 1 / (s² - g/l)
