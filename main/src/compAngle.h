@@ -3,5 +3,4 @@
 
 void initIMU();         // Initializes the IMU
 float getCompAngle();  // Returns the complementary tilt angle
-int computePID(float currentAngle);       // Computes the PID output
 #endif
