@@ -4,33 +4,36 @@
 
 #define leftForward D2
 #define leftReverse D3
-#define rightForward D4
-#define rightReverse D5
+#define rightForward D5
+#define rightReverse D4
 
 const int motors[] = {leftForward, rightForward, leftReverse, rightReverse};
 const int forward[] = {leftForward, rightForward};
 const int reverse[] = {leftReverse, rightReverse};
 
-double setpoint = 0;  // Desired angle (0 degrees)
+double setpoint = 1.6;  // Desired angle (0 degrees)
 double input, output;
-// Ku = 30, Tu = 1.2
-double Kp = 80;  // Proportional gain
-double Ki = 0;  // Integral gain
-double Kd = 20; // Derivative gain
+// double Kp = 6;  // Proportional gain
+// double Ki = 0.15;  // Integral gain
+// double Kd = 0.05; // Derivative gain
+double Kp = 60; // 7
+double Ki = 0; // 0.5
+double Kd = 0; // 0.1
 PID myPID(&input, &output, &setpoint, Kp, Ki, Kd, DIRECT);
 
 unsigned long lastPIDUpdate = 0;
 const int interval = 10;  // PID update interval in milliseconds
 
-int speed = 0;  // Motor speed (0-255)
+int speed = 40;  // Motor speed (0-255)
 int sign = 0;  // Sign of the angle (1 for forward, -1 for reverse)
 double currentAngle = 0;  // Current angle from the IMU
 double prevAngle = 0;  // Previous angle for PID calculation
 
 // Function to calculate PWM from RPM using the given polynomial equation
 int rpm2pwm(float rpm) {
-//     // return 0.000041559 * pow(rpm, 3) - 0.0347502552 * pow(rpm, 2) + 9.8233911975 * rpm - 860.4124730999;
-    return 0.000675698364746 * pow(rpm, 2.07915394237297); // Exponential equation
+    // return 0.000041559 * pow(rpm, 3) - 0.0347502552 * pow(rpm, 2) + 9.8233911975 * rpm - 860.4124730999;
+    int pwm = 0.000675698364746 * pow(rpm, 2.07915394237297); // Exponential equation
+    return pwm;  // Ensure PWM is within valid range (0-255)
 }
 
 void PIDLoop() {
@@ -40,19 +43,25 @@ void PIDLoop() {
 
         // Get the current angle from the IMU
         currentAngle = getCompAngle();  // Get tilt angle
-        sign = (currentAngle > 0) ? 1 : -1;  // Determine the sign of the angle
-        currentAngle = abs(currentAngle);  // Use absolute value for PID calculation
+
+        // Determine sign from real angle (negative or positive)
+        if (currentAngle > 0) {
+            sign = 1;
+        } else if (currentAngle < 0) {
+            sign = -1;
+        } else {
+            sign = 0;
+        }
+
+        currentAngle = abs(currentAngle);
 
         // Compute PID output
         input = setpoint - currentAngle;
-
-        // Update PID controller
         myPID.Compute();
 
         // Adjust motor speed based on PID output
-        speed = (int)output;  // Convert output to integer for PWM
-        speed = constrain(rpm2pwm(speed), 0, 255);  // Ensure speed is within valid range
-
+        speed = (int)output;
+        speed = constrain(rpm2pwm(speed), 0, 255);
         Serial.print("Current Angle: ");
         Serial.print(currentAngle);
     }

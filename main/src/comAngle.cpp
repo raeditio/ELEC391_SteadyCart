@@ -8,7 +8,7 @@ float accelAngle = 0;          // Angle calculated using only the accelerometer
 float gyroAngle;           // Angle calculated using only the gyroscope
 float compAngle;           // Combined angle using complementary filter
 
-float Kc = 0.91;  // Weight for accelerometer data (adjust as needed)
+float Kc = 0.6;  // Weight for accelerometer data (adjust as needed)
 
 unsigned long prevTime = 0;
 
@@ -64,6 +64,17 @@ float getGyroAngle() {
 float getCompAngle() {
     // Combine accelerometer and gyroscope readings using complementary filter
     compAngle = Kc * (compAngle + getGyroAngle() * ((millis() - prevTime) / 1000.0)) + (1 - Kc) * getAccelAngle();
+    prevTime = millis();  // Update previous time for next calculation
+
+    // Optional: Print angles for debugging
+    Serial.print("Comp Angle: ");
+    Serial.print(compAngle);
+    Serial.print(" | ");
+    Serial.print("Gyro Angle: ");
+    Serial.print(gyroAngle);
+    Serial.print(" | ");
+    Serial.print("Accel Angle: ");
+    Serial.println(accelAngle);
     
     Serial.print("Comp Angle: ");
     Serial.print(compAngle);
