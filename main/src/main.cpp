@@ -16,9 +16,10 @@ double input, output;
 // double Kp = 6;  // Proportional gain
 // double Ki = 0.15;  // Integral gain
 // double Kd = 0.05; // Derivative gain
-double Kp = 60; // 7
-double Ki = 0; // 0.5
-double Kd = 0; // 0.1
+double Kp = 3.75; // 7
+double Ki = 0.075; // 0.5
+double Kd = 0.57;
+double gain = 10;
 PID myPID(&input, &output, &setpoint, Kp, Ki, Kd, DIRECT);
 
 unsigned long lastPIDUpdate = 0;
@@ -30,11 +31,11 @@ double currentAngle = 0;  // Current angle from the IMU
 double prevAngle = 0;  // Previous angle for PID calculation
 
 // Function to calculate PWM from RPM using the given polynomial equation
-int rpm2pwm(float rpm) {
-    // return 0.000041559 * pow(rpm, 3) - 0.0347502552 * pow(rpm, 2) + 9.8233911975 * rpm - 860.4124730999;
-    int pwm = 0.000675698364746 * pow(rpm, 2.07915394237297); // Exponential equation
-    return pwm;  // Ensure PWM is within valid range (0-255)
-}
+// int rpm2pwm(float rpm) {
+//     // return 0.000041559 * pow(rpm, 3) - 0.0347502552 * pow(rpm, 2) + 9.8233911975 * rpm - 860.4124730999;
+//     int pwm = 0.000675698364746 * pow(rpm, 2.07915394237297); // Exponential equation
+//     return pwm;  // Ensure PWM is within valid range (0-255)
+// }
 
 void PIDLoop() {
     unsigned long currentTime = millis();
@@ -61,7 +62,7 @@ void PIDLoop() {
 
         // Adjust motor speed based on PID output
         speed = (int)output;
-        speed = constrain(rpm2pwm(speed), 0, 255);
+        speed = constrain(speed * gain, 0, 255);
         Serial.print("Current Angle: ");
         Serial.print(currentAngle);
     }
@@ -113,3 +114,32 @@ void loop() {
     Serial.println(sign * speed);  // Print speed with sign
     delay(100);  // Short delay for readability
 }
+
+
+// void setup() {
+//     Serial.begin(115200);
+//     Serial.println("RightForward");
+//     analogWrite(rightForward, 255);
+//     delay(1000);
+//     analogWrite(rightForward, 0);
+//     delay(1000);
+//     Serial.println("LeftForward");
+//     analogWrite(leftForward, 255);
+//     delay(1000);
+//     analogWrite(leftForward, 0);
+//     delay(1000);
+//     Serial.println("RightReverse");
+//     analogWrite(rightReverse, 255);
+//     delay(1000);
+//     analogWrite(rightReverse, 0);
+//     delay(1000);
+//     Serial.println("LeftReverse");
+//     analogWrite(leftReverse, 255);
+//     delay(1000);
+//     analogWrite(leftReverse, 0);
+//     delay(1000);
+// }
+
+// void loop() {
+//     // Nothing to do here
+// }
