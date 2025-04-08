@@ -11,14 +11,14 @@ const int motors[] = {leftForward, rightForward, leftReverse, rightReverse};
 const int forward[] = {leftForward, rightForward};
 const int reverse[] = {leftReverse, rightReverse};
 
-double setpoint = 1.6;  // Desired angle (0 degrees)
+double setpoint = 19;  // Desired angle (0 degrees)
 double input, output;
 // double Kp = 6;  // Proportional gain
 // double Ki = 0.15;  // Integral gain
 // double Kd = 0.05; // Derivative gain
 double Kp = 3.75; // 7
 double Ki = 0.075; // 0.5
-double Kd = 0.57;
+double Kd = 0.6;
 double gain = 10;
 PID myPID(&input, &output, &setpoint, Kp, Ki, Kd, DIRECT);
 
