@@ -6,8 +6,8 @@
 
 // IMU Variables
 double accelAngle = 0;          // Angle calculated using only the accelerometer
-double gyroAngle;           // Angle calculated using only the gyroscope
-double compAngle;           // Combined angle using complementary filter
+double gyroAngle;               // Angle calculated using only the gyroscope
+double compAngle;               // Combined angle using complementary filter
 
 float Kc = 0.4;  // Weight for accelerometer data (adjust as needed)
 
@@ -26,32 +26,21 @@ float ypr[3];           // [yaw, pitch, roll]   yaw/pitch/roll
 void initIMU() {
     Serial.begin(115200);
     delay(100);  // Short delay to allow serial connection to initialize
-    Serial.println("Initializing IMU...");
+    Serial.println("Initializing MPU6050...");
 
-    if (!IMU.begin()) {
-        Serial.println("Failed to initialize IMU!");
-        while (1);
+    Wire.begin();  // Initialize I2C communication
+    mpu.initialize();  // Initialize MPU6050
+
+    // Check MPU6050 connection
+    if (!mpu.testConnection()) {
+        Serial.println("MPU6050 connection failed!");
+        while (1);  // Halt execution if the IMU is not connected
     }
+    Serial.println("MPU6050 connected.");
 
-    Serial.println("IMU Initialized.");
-
-    // Read initial accelerometer data to determine the starting angle
-    float ax, ay, az;
-    while (!IMU.accelerationAvailable());
-    IMU.readAcceleration(ax, ay, az);
-
-    // Compute initial tilt angle
-    accelAngle = atan2(ay, az) * 180.0 / PI;
-    gyroAngle = accelAngle;  // Set initial gyroAngle as accelAngle
-    compAngle = accelAngle;  // Set initial compAngle as accelAngle
-
-    prevTime = millis();  // Initialize time for PID
-
-    Wire.begin(21, 22);  // ESP32 default I2C pins: SDA=21, SCL=22
-    mpu.initialize();
-    // Optionally check mpu.testConnection() here
-
+    // Initialize DMP
     uint8_t devStatus = mpu.dmpInitialize();
+
     // (Optional) Adjust offsets here if needed:
     // mpu.setXAccelOffset(...); etc.
 
@@ -59,42 +48,49 @@ void initIMU() {
         mpu.setDMPEnabled(true);
         dmpReady = true;
         packetSize = mpu.dmpGetFIFOPacketSize();
+        Serial.println("DMP ready.");
     } else {
-        Serial.println("DMP Initialization failed.");
+        Serial.print("DMP Initialization failed (code ");
+        Serial.print(devStatus);
+        Serial.println(").");
+        while (1);  // Halt execution if DMP initialization fails
     }
+
+    // Initialize time for complementary filter
+    prevTime = millis();
 }
 
 float getAccelAngle() {
-    if (IMU.accelerationAvailable()) {
-        float ax, ay, az;
-        IMU.readAcceleration(ax, ay, az);
+    // This function is not used with the DMP but kept for reference
+    int16_t ax, ay, az;
+    mpu.getAcceleration(&ax, &ay, &az);
 
-        // Compute tilt angle directly using the accelerometer
-        accelAngle = atan2(ay, az) * 180.0 / PI;
-    }
+    // Compute tilt angle directly using the accelerometer
+    accelAngle = atan2(ay, az) * 180.0 / PI;
     return accelAngle;
 }
 
 float getGyroAngle() {
-    // float prevAngle = gyroAngle;
-    if (IMU.gyroscopeAvailable()) {
-        // Compute tilt angle using the gyroscope
-        float gx, gy, gz;
-        IMU.readGyroscope(gx, gy, gz);
-        float dt = (millis() - prevTime) / 1000.0;  // Time difference in seconds
-        prevTime = millis();
-        gyroAngle -= gx * dt;
-    }
-    return (gyroAngle);
+    // This function is not used with the DMP but kept for reference
+    int16_t gx, gy, gz;
+    mpu.getRotation(&gx, &gy, &gz);
+
+    // Compute angular velocity (gyro rate) in degrees per second
+    float dt = (millis() - prevTime) / 1000.0;  // Time difference in seconds
+    prevTime = millis();
+    gyroAngle += gx * dt / 131.0;  // Convert raw gyro data to degrees/s
+    return gyroAngle;
 }
 
 float getCompAngle() {
     if (!dmpReady) return 0.0;
+
     // Check FIFO count
     fifoCount = mpu.getFIFOCount();
     while (fifoCount < packetSize) {
         fifoCount = mpu.getFIFOCount();
     }
+
     // Read data from FIFO
     mpu.getFIFOBytes(fifoBuffer, packetSize);
     fifoCount -= packetSize;
