@@ -36,6 +36,12 @@ double prevAngle = 0;  // Previous angle for PID calculation
 //     return pwm;  // Ensure PWM is within valid range (0-255)
 // }
 
+// Assign a unique channel for each motor pin
+static const int leftForwardChannel = 0;
+static const int rightForwardChannel = 1;
+static const int leftReverseChannel = 2;
+static const int rightReverseChannel = 3;
+
 void PIDLoop() {
     unsigned long currentTime = millis();
     if (currentTime - lastPIDUpdate >= interval) {
@@ -71,15 +77,15 @@ void PIDLoop() {
 void motorControl() {
     // Set motor speed and direction based on PID output
     if (sign < 0) {
-        analogWrite(leftForward, speed);
-        analogWrite(rightForward, speed);
-        analogWrite(leftReverse, 0);
-        analogWrite(rightReverse, 0);
+        ledcWrite(leftForwardChannel, speed);
+        ledcWrite(rightForwardChannel, speed);
+        ledcWrite(leftReverseChannel, 0);
+        ledcWrite(rightReverseChannel, 0);
     } else if (sign > 0) {
-        analogWrite(leftForward, 0);
-        analogWrite(rightForward, 0);
-        analogWrite(leftReverse, speed);
-        analogWrite(rightReverse, speed);
+        ledcWrite(leftForwardChannel, 0);
+        ledcWrite(rightForwardChannel, 0);
+        ledcWrite(leftReverseChannel, speed);
+        ledcWrite(rightReverseChannel, speed);
     } else {
         // Stop motors if output is zero
         for (int i = 0; i < 4; i++) {
@@ -99,6 +105,19 @@ void setup() {
         pinMode(motors[i], OUTPUT);
         digitalWrite(motors[i], LOW);  // Ensure motors are off initially
     }
+
+    // Example: 20 kHz PWM, 8-bit resolution
+    ledcSetup(leftForwardChannel, 20000, 8);
+    ledcAttachPin(leftForward, leftForwardChannel);
+
+    ledcSetup(rightForwardChannel, 20000, 8);
+    ledcAttachPin(rightForward, rightForwardChannel);
+
+    ledcSetup(leftReverseChannel, 20000, 8);
+    ledcAttachPin(leftReverse, leftReverseChannel);
+
+    ledcSetup(rightReverseChannel, 20000, 8);
+    ledcAttachPin(rightReverse, rightReverseChannel);
 
     myPID.SetMode(AUTOMATIC);  // Set PID mode to automatic
     myPID.SetOutputLimits(-10000, 10000);
